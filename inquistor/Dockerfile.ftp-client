@@ -1,0 +1,21 @@
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    ftp \
+    iputils-ping \
+    net-tools \
+    lftp \
+    nano \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create user
+RUN useradd -m ftpuser && echo "ftpuser:ftppassword" | chpasswd
+
+# Create directory for test files
+RUN mkdir -p /home/ftpuser/files && \
+    chown ftpuser:ftpuser /home/ftpuser/files
+
+USER ftpuser
+WORKDIR /home/ftpuser/files
+
+CMD ["bash"]

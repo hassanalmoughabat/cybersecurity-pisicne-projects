@@ -1,0 +1,8 @@
+sudo systemctl restart nginx                                
+sudo systemctl restart ssh                    
+sudo systemctl restart tor
+
+>$ sudo cat /var/lib/tor/hidden_service/hostname               
+
+
+snowflake bridge

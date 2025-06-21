@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  ftp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.ftp-server
+    container_name: ftp-server
+    networks:
+      inquisitor_net:
+        ipv4_address: 172.20.0.2
+    volumes:
+      - ./test/server-files:/home/ftpuser/ftp
+    ports:
+      - "2121:21"  # Map host port 2121 to container port 21
+      - "2020:20"  # Map host port 2020 to container port 20
+      - "30000-30009:30000-30009"  # These are fine as they're > 1024
+    cap_add:
+      - NET_ADMIN
+    hostname: ftp-server
+
+  ftp-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.ftp-client
+    container_name: ftp-client
+    networks:
+      inquisitor_net:
+        ipv4_address: 172.20.0.3
+    volumes:
+      - ./test/client-files:/home/ftpuser/files
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - ftp-server
+    hostname: ftp-client
+    tty: true
+
+  attacker:
+    build:
+      context: .
+      dockerfile: Dockerfile.inquisitor
+    container_name: attacker
+    networks:
+      inquisitor_net:
+        ipv4_address: 172.20.0.4
+    volumes:
+      - ./src:/app
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    depends_on:
+      - ftp-server
+      - ftp-client
+    hostname: attacker
+    tty: true
+
+networks:
+  inquisitor_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

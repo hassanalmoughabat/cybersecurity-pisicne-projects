@@ -1,0 +1,24 @@
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    vsftpd \
+    iputils-ping \
+    net-tools \
+    nano \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create FTP user
+RUN useradd -m ftpuser && echo "ftpuser:ftppassword" | chpasswd
+
+# Create directories
+RUN mkdir -p /home/ftpuser/ftp && \
+    chown ftpuser:ftpuser /home/ftpuser/ftp && \
+    chmod 755 /home/ftpuser/ftp
+
+# Configure vsftpd
+COPY ./test/vsftpd.conf /etc/vsftpd.conf
+
+# Expose FTP ports
+EXPOSE 20 21 30000-30009
+
+CMD ["vsftpd", "/etc/vsftpd.conf"]
